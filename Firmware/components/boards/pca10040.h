@@ -54,12 +54,12 @@ extern "C" {
 // LEDs definitions for PCA10040
 #define LEDS_NUMBER    4
 
-#define LED_START      17
-#define LED_1          17
-#define LED_2          18
-#define LED_3          19
-#define LED_4          20
-#define LED_STOP       20
+#define LED_START      13
+#define LED_1          13
+#define LED_2          14
+#define LED_3          15
+#define LED_4          16
+#define LED_STOP       16
 
 #define LEDS_ACTIVE_STATE 0
 
@@ -74,12 +74,12 @@ extern "C" {
 
 #define BUTTONS_NUMBER 4
 
-#define BUTTON_START   13
-#define BUTTON_1       13
-#define BUTTON_2       14
-#define BUTTON_3       15
-#define BUTTON_4       16
-#define BUTTON_STOP    16
+#define BUTTON_START   11
+#define BUTTON_1       11
+#define BUTTON_2       17
+#define BUTTON_3       18
+#define BUTTON_4       19
+#define BUTTON_STOP    19
 #define BUTTON_PULL    NRF_GPIO_PIN_PULLUP
 
 #define BUTTONS_ACTIVE_STATE 0
@@ -92,9 +92,9 @@ extern "C" {
 #define BSP_BUTTON_3   BUTTON_4
 
 #define RX_PIN_NUMBER  8
-#define TX_PIN_NUMBER  6
-#define CTS_PIN_NUMBER 7
-#define RTS_PIN_NUMBER 5
+#define TX_PIN_NUMBER  7
+//#define CTS_PIN_NUMBER 7
+//#define RTS_PIN_NUMBER 5
 #define HWFC           true
 
 #define SPIS_MISO_PIN   28  // SPI MISO signal.

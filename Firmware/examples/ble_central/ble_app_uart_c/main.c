@@ -290,43 +290,6 @@ static void ble_nus_chars_received_uart_print(uint8_t * p_data, uint16_t data_le
 
 buffer_t m_buf;
 
-//void ble_data_send_with_queue(void)
-//{
-//	uint32_t err_code;
-//	uint16_t length = 0;
-//	static bool retry = false;
-//	
-//	
-//	while (!nrf_queue_is_empty(&m_buf_queue) && LibuartFree)
-//	{		
-
-//		err_code = nrf_queue_pop(&m_buf_queue, &m_buf);
-//		APP_ERROR_CHECK(err_code);		
-//		length = m_buf.length;
-//					
-////		if(LibuartFree){
-//			err_code = nrf_libuarte_async_tx(&libuarte,m_buf.p_data, 90);		
-////		}
-//		//NRF_LOG_INFO("Data: %d", m_buf.p_data[0]);
-//		if ( (err_code != NRF_ERROR_BUSY) && (err_code != NRF_ERROR_INTERNAL) )
-//		{
-//				APP_ERROR_CHECK(err_code);
-//		}
-//		if (err_code == NRF_SUCCESS)
-//		{
-////			m_len_sent += length;
-////			retry = false;
-////			LibuartFree = true;
-//		}
-//		else
-//		{
-//			LibuartFree = false;
-////			retry = true;
-//			break;
-//		}
-//	}			
-//}
-
 void ble_data_send_with_queue(void)
 {
 	uint32_t err_code;
@@ -666,30 +629,30 @@ void bsp_event_handler(bsp_event_t event)
 }
 
 /**@brief Function for initializing the UART. */
-static void uart_init(void)
-{
-    ret_code_t err_code;
+//static void uart_init(void)
+//{
+//    ret_code_t err_code;
 
-    app_uart_comm_params_t const comm_params =
-    {
-        .rx_pin_no    = RX_PIN_NUMBER,
-        .tx_pin_no    = TX_PIN_NUMBER,
-        .rts_pin_no   = RTS_PIN_NUMBER,
-        .cts_pin_no   = CTS_PIN_NUMBER,
-        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
-        .use_parity   = false,
-        .baud_rate    = UART_BAUDRATE_BAUDRATE_Baud115200
-    };
+//    app_uart_comm_params_t const comm_params =
+//    {
+//        .rx_pin_no    = RX_PIN_NUMBER,
+//        .tx_pin_no    = TX_PIN_NUMBER,
+//        .rts_pin_no   = RTS_PIN_NUMBER,
+//        .cts_pin_no   = CTS_PIN_NUMBER,
+//        .flow_control = APP_UART_FLOW_CONTROL_DISABLED,
+//        .use_parity   = false,
+//        .baud_rate    = UART_BAUDRATE_BAUDRATE_Baud115200
+//    };
 
-    APP_UART_FIFO_INIT(&comm_params,
-                       UART_RX_BUF_SIZE,
-                       UART_TX_BUF_SIZE,
-                       uart_event_handle,
-                       APP_IRQ_PRIORITY_LOWEST,
-                       err_code);
+//    APP_UART_FIFO_INIT(&comm_params,
+//                       UART_RX_BUF_SIZE,
+//                       UART_TX_BUF_SIZE,
+//                       uart_event_handle,
+//                       APP_IRQ_PRIORITY_LOWEST,
+//                       err_code);
 
-    APP_ERROR_CHECK(err_code);
-}
+//    APP_ERROR_CHECK(err_code);
+//}
 
 /**@brief Function for initializing the Nordic UART Service (NUS) client. */
 static void nus_c_init(void)
@@ -786,7 +749,7 @@ int main(void)
     nrf_libuarte_async_config_t nrf_libuarte_async_config = {
             .tx_pin     = TX_PIN_NUMBER,
             .rx_pin     = RX_PIN_NUMBER,
-            .baudrate   = NRF_UARTE_BAUDRATE_460800,
+            .baudrate   = NRF_UARTE_BAUDRATE_921600,
             .parity     = NRF_UARTE_PARITY_EXCLUDED,
             .hwfc       = NRF_UARTE_HWFC_DISABLED,
             .timeout_us = 100,
