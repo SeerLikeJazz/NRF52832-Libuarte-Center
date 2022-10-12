@@ -6,7 +6,7 @@ clear
 clc
 
 delete(instrfindall);
-scom = 'COM9'; %name of serial
+scom = 'COM3'; %name of serial
 Baudrate = 921600; %serial baudrate, should be same as the mcu setting
 b = serial(scom);
 b.InputBufferSize=2500;
@@ -27,8 +27,6 @@ EMG_frame=zeros(1,EMG_CHANNEL);%%%数据解析后的数据帧
 
 result_emg=zeros(2500,EMG_CHANNEL);%%%绘图更新缓冲区
 result_emg_idx=1;
-
-
 
 
 fig=figure();
@@ -70,15 +68,7 @@ while true
                     emg_cnt_state=1;
                 else
                     emg_cnt_state=0;
-                end
-%             case 2
-%                 if(buff(index) == emg_cnt_max)
-%                     datalen = buff(index);%%数据域的长度等于12或18
-%                     EMG_bytes=zeros(1,datalen);%%清空数据帧
-%                     emg_cnt_state = 3;
-%                 else
-%                     emg_cnt_state = 0;
-%                 end                
+                end               
             case 2
                 EMG_bytes(1,emg_cnt_count) = buff(index);
                 emg_cnt_count = emg_cnt_count + 1;
@@ -101,10 +91,10 @@ while true
 
                 for i=1:9
                     for j=1:8
-                       if(EMG_bytes(1,i*j*3-2) > 127)%%%第8位是否为1
-                           EEG(j,(emg_idx-1)*9+i) = swapbytes(typecast(uint8([255 EMG_bytes((i*j*3-2):i*j*3)]),'int32'));
+                       if(EMG_bytes(1,j*3-2+24*(i-1)) > 127)%%%第8位是否为1
+                           EEG(j,(emg_idx-1)*9+i) = swapbytes(typecast(uint8([255 EMG_bytes((j*3-2+24*(i-1)):j*3+24*(i-1))]),'int32'));
                        else
-                           EEG(j,(emg_idx-1)*9+i) = swapbytes(typecast(uint8([0   EMG_bytes((i*j*3-2):i*j*3)]),'int32'));                       
+                           EEG(j,(emg_idx-1)*9+i) = swapbytes(typecast(uint8([0   EMG_bytes((j*3-2+24*(i-1)):j*3+24*(i-1))]),'int32'));                       
                        end                         
                     end
                 end
@@ -131,3 +121,5 @@ while true
      
 end
 
+
+TT = diff(EMG_Sequence);
