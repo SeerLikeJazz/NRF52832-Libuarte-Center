@@ -2,6 +2,9 @@
 %采样率：500Hz
 %数据格式：包头 + EEG数据 +校验 + 包序号
 %BBAA + 24x9 + 校验位 + 包序号 = 220字节
+%EEG：存原始数据
+%EMG_Sequence：包序号
+
 clear
 clc
 
@@ -35,7 +38,7 @@ for k=1:8
     subplot(4,2,k);
     line_EMG{k}=plot((1:size(result_emg,1))/500,result_emg(:,k));
 
-    ylim([-3300000/2/2500,3300000/2/2500])
+%     ylim([-3300000/2/2500,3300000/2/2500])
     ylabel('幅值(uV)');
     xlim([0,size(result_emg,1)/500])
     xlabel('时间(s)');
