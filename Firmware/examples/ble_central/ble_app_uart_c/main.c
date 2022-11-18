@@ -213,6 +213,23 @@ static void scan_evt_handler(scan_evt_t const * p_scan_evt)
              NRF_LOG_INFO("Scan timed out.");
              scan_start();
          } break;
+				 
+				 //扫描数据匹配过滤器事件
+			   case NRF_BLE_SCAN_EVT_FILTER_MATCH:
+         {
+					NRF_LOG_INFO("Scan FILTER MATCH MAC.");
+					ble_gap_evt_adv_report_t const * p_adv_report =p_scan_evt->params.filter_match.p_adv_report; //未连接状态下的报告
+        	//MAC 输出
+	      NRF_LOG_INFO("Connecting to target %02x%02x%02x%02x%02x%02x",
+                     p_adv_report->peer_addr.addr[0],
+                     p_adv_report->peer_addr.addr[1],
+                     p_adv_report->peer_addr.addr[2],
+                     p_adv_report->peer_addr.addr[3],
+                     p_adv_report->peer_addr.addr[4],
+                     p_adv_report->peer_addr.addr[5]
+                     );
+					 
+         } break;
 
          default:
              break;
@@ -220,6 +237,12 @@ static void scan_evt_handler(scan_evt_t const * p_scan_evt)
 }
 
 
+//写入需要过滤设备的地址
+static ble_gap_addr_t m_target_periph_addr =
+{
+    .addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC,
+    .addr      = {0xE8,0x40, 0x8E,0xF3,0x14,0xD4} // This matches what nRF Connect shows via Scan, for peripheral
+};
 /**@brief Function for initializing the scanning and setting the filters.
  */
 static void scan_init(void)
@@ -235,10 +258,10 @@ static void scan_init(void)
     err_code = nrf_ble_scan_init(&m_scan, &init_scan, scan_evt_handler);
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_ble_scan_filter_set(&m_scan, SCAN_UUID_FILTER, &m_nus_uuid);
+    err_code = nrf_ble_scan_filter_set(&m_scan, SCAN_ADDR_FILTER, &m_target_periph_addr.addr);
     APP_ERROR_CHECK(err_code);
 
-    err_code = nrf_ble_scan_filters_enable(&m_scan, NRF_BLE_SCAN_UUID_FILTER, false);
+    err_code = nrf_ble_scan_filters_enable(&m_scan, NRF_BLE_SCAN_ADDR_FILTER, false);
     APP_ERROR_CHECK(err_code);
 }
 
