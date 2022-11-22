@@ -143,7 +143,7 @@ void ble_data_send_with_queue(void);
 void uart_event_handler(void * context, nrf_libuarte_async_evt_t * p_evt)
 {
     nrf_libuarte_async_t * p_libuarte = (nrf_libuarte_async_t *)context;
-    ret_code_t ret;
+		uint32_t ret_val;
 
     switch (p_evt->type)
     {
@@ -151,9 +151,17 @@ void uart_event_handler(void * context, nrf_libuarte_async_evt_t * p_evt)
             bsp_board_led_invert(0);
             break;
         case NRF_LIBUARTE_ASYNC_EVT_RX_DATA:
-					
+                do
+                {
+                    ret_val = ble_nus_c_string_send(&m_ble_nus_c, p_evt->data.rxtx.p_data, p_evt->data.rxtx.length);
+                    if ( (ret_val != NRF_ERROR_INVALID_STATE) && (ret_val != NRF_ERROR_RESOURCES) )
+                    {
+                        APP_ERROR_CHECK(ret_val);
+                    }
+                } while (ret_val == NRF_ERROR_RESOURCES);
+								
             bsp_board_led_invert(1);
-				
+						nrf_libuarte_async_rx_free(p_libuarte, p_evt->data.rxtx.p_data, p_evt->data.rxtx.length);
             break;
         case NRF_LIBUARTE_ASYNC_EVT_TX_DONE:
 					LibuartFree = true;
@@ -241,7 +249,8 @@ static void scan_evt_handler(scan_evt_t const * p_scan_evt)
 static ble_gap_addr_t m_target_periph_addr =
 {
     .addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC,
-    .addr      = {0xE8,0x40, 0x8E,0xF3,0x14,0xD4} // This matches what nRF Connect shows via Scan, for peripheral
+//    .addr      = {0xE8,0x40, 0x8E,0xF3,0x14,0xD4} // This matches what nRF Connect shows via Scan, for peripheral
+		.addr      = {0x59,0x6A, 0x96,0x8D,0x88,0xF8} // This matches what nRF Connect shows via Scan, for peripheral
 };
 /**@brief Function for initializing the scanning and setting the filters.
  */
