@@ -63,6 +63,7 @@
 #include "nrf_log_default_backends.h"
 
 #include "nrf_libuarte_async.h"
+#include "nrf_delay.h"
 
 NRF_LIBUARTE_ASYNC_DEFINE(libuarte, 0, 1, 2, NRF_LIBUARTE_PERIPHERAL_NOT_USED, 255, 3);
 
@@ -250,7 +251,9 @@ static ble_gap_addr_t m_target_periph_addr =
 {
     .addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC,
 //    .addr      = {0xE8,0x40, 0x8E,0xF3,0x14,0xD4} // This matches what nRF Connect shows via Scan, for peripheral
-		.addr      = {0x59,0x6A, 0x96,0x8D,0x88,0xF8} // This matches what nRF Connect shows via Scan, for peripheral
+//		.addr      = {0x59,0x6A, 0x96,0x8D,0x88,0xF8} // This matches what nRF Connect shows via Scan, for peripheral
+//	  .addr      = {0xBD,0x56, 0xAF,0xCF,0x67,0xF3} // This matches what nRF Connect shows via Scan, for peripheral
+		.addr      = {0x51,0xA5, 0x62,0x6E,0x2F,0xF3} // This matches what nRF Connect shows via Scan, for peripheral
 };
 /**@brief Function for initializing the scanning and setting the filters.
  */
@@ -745,12 +748,54 @@ static void idle_state_handle(void)
     }
 }
 
+void	FEM_LED_BSP_gpio_init()
+{	
+	nrf_gpio_cfg_output(24);		//FEM Enable
+	nrf_gpio_pin_set(24);
+}
+
+static void pa_lna_assist(uint32_t gpio_pa_pin, uint32_t gpio_lna_pin)
+{
+    ret_code_t err_code;
+    nrf_gpio_cfg_output(gpio_pa_pin);
+    nrf_gpio_pin_clear(gpio_pa_pin); 
+    nrf_gpio_cfg_output(gpio_lna_pin);
+    nrf_gpio_pin_clear(gpio_lna_pin); 
+	
+    static const uint32_t gpio_toggle_ch = 0;
+    static const uint32_t ppi_set_ch = 6;
+    static const uint32_t ppi_clr_ch = 7;
+
+    // Configure SoftDevice PA/LNA assist
+    static ble_opt_t opt;
+    memset(&opt, 0, sizeof(ble_opt_t));
+	
+    // Common PA/LNA config
+    opt.common_opt.pa_lna.gpiote_ch_id  = gpio_toggle_ch;        // GPIOTE channel
+    opt.common_opt.pa_lna.ppi_ch_id_clr = ppi_clr_ch;            // PPI channel for pin clearing
+    opt.common_opt.pa_lna.ppi_ch_id_set = ppi_set_ch;            // PPI channel for pin setting
+	
+    // PA config
+    opt.common_opt.pa_lna.pa_cfg.active_high = 1;                // Set the pin to be active high
+    opt.common_opt.pa_lna.pa_cfg.enable      = 1;                // Enable toggling
+    opt.common_opt.pa_lna.pa_cfg.gpio_pin    = gpio_pa_pin;      // The GPIO pin to toggle
+
+    // LNA config
+    opt.common_opt.pa_lna.lna_cfg.active_high  = 1;              // Set the pin to be active high
+    opt.common_opt.pa_lna.lna_cfg.enable       = 1;              // Enable toggling
+    opt.common_opt.pa_lna.lna_cfg.gpio_pin     = gpio_lna_pin;   // The GPIO pin to toggle
+
+    err_code = sd_ble_opt_set(BLE_COMMON_OPT_PA_LNA, &opt);
+    APP_ERROR_CHECK(err_code);
+
+}
 
 int main(void)
 {
     // Initialize.
     log_init();
     timer_init();
+	FEM_LED_BSP_gpio_init();
 	
     nrf_libuarte_async_config_t nrf_libuarte_async_config = {
             .tx_pin     = TX_PIN_NUMBER,
@@ -774,6 +819,13 @@ int main(void)
     db_discovery_init();
     power_management_init();
     ble_stack_init();
+		
+		/*
+		*	PA_LNA RF…‰∆µ
+		*/
+		nrf_delay_ms(50);
+		pa_lna_assist(27,26);		
+		
     gatt_init();
     nus_c_init();
     scan_init();

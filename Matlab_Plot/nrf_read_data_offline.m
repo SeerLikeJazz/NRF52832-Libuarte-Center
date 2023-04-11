@@ -6,7 +6,7 @@
 %EMG_Sequence：包序号
 
 clear;clc;
-filename = 'nrf_test2.txt';
+filename = 'qqq';
 % data=textread(filename,'%2c','delimiter','-');%%%手机App接收
 data=textread(filename,'%2c');%%%UartAssist.exe接收
 buff=hex2dec(data(:,:));
@@ -80,3 +80,5 @@ end
 AA=diff(TT(220,:));
 BB=find(AA~=1);
 CC=diff(BB);
+
+

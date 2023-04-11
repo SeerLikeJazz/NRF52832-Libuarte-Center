@@ -3,6 +3,11 @@
 ![](/Image/USB_Dongle.jpg)  
 
 ## 更新记录
+### 23.04.11
+- PPI待研究
+- 硬件更新（李旺的主机）：增加nRF21540，使用到MODE、RX_EN、TX_EN、#PDN引脚
+- 引脚更换
+
 ### 22.11.22
 - 主机通过UART接收PC的指令数据，发送给peripheral
 

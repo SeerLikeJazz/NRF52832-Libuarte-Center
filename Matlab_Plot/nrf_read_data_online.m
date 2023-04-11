@@ -9,7 +9,7 @@ clear
 clc
 
 delete(instrfindall);
-scom = 'COM3'; %name of serial
+scom = 'COM9'; %name of serial
 Baudrate = 921600; %serial baudrate, should be same as the mcu setting
 b = serial(scom);
 b.InputBufferSize=2500;
