@@ -2,8 +2,16 @@
 主机接收，串口发送PC端  
 ![](/Image/USB_Dongle.jpg)  
 
+## 待完成
+- 串口号自动识别，FT232
+- eConScan的功能复现：阻抗、滤波、通道、参考
+- 添加UI
+
 ## 更新记录
-### 23.04.11
+### 23.04.16
+- Deletenrf_read_data_online.m，修改为Sig_Viewer.m
+
+### 23.04.11-硬件更新(李旺的主机)
 - PPI待研究
 - 硬件更新（李旺的主机）：增加nRF21540，使用到MODE、RX_EN、TX_EN、#PDN引脚
 - 引脚更换

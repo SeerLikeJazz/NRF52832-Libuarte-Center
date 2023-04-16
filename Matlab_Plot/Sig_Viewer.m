@@ -4,15 +4,16 @@
 %BBAA + 24x9 + 校验位 + 包序号 = 220字节
 %EEG：存原始数据
 %EMG_Sequence：包序号
+%校验位还未检查
 
 clear
 clc
 
 delete(instrfindall);
-scom = 'COM9'; %name of serial
+scom = 'COM4'; %name of serial
 Baudrate = 921600; %serial baudrate, should be same as the mcu setting
 b = serial(scom);
-b.InputBufferSize=2500;
+b.InputBufferSize=25000;
 
 set(b,'BaudRate',Baudrate);
 fopen(b);
@@ -25,27 +26,29 @@ EMG_bytes=zeros(1,emg_cnt_max);%%%记录一帧的字节数据
 emg_cnt_state=0;%%%记录switch函数的状态
 emg_cnt_count=0;%%%每次计数到emg_cnt_max为止
 emg_idx=1;
+EMG_frame=zeros(9,EMG_CHANNEL);%%%数据解析后的数据帧
 
-EMG_frame=zeros(EMG_CHANNEL,9);%%%数据解析后的数据帧
-
-result_emg=zeros(EMG_CHANNEL,2502);%%%绘图更新缓冲区
+result_emg=zeros(2502,EMG_CHANNEL);%%%绘图更新缓冲区
 result_emg_idx=1;
 
-
-fig=figure();
-hold on;
-for k=1:8
-    subplot(4,2,k);
-    line_EMG{k}=plot((1:size(result_emg,2))/500,result_emg(k,:));
-
-%     ylim([-3300000/2/2500,3300000/2/2500])
-    ylabel('幅值(uV)');
-    xlim([0,size(result_emg,2)/500])
-    xlabel('时间(s)');
+%设置图的数据源
+T=['result_emg(:,  )'];
+for Z=1:8
+    line_EMG{Z}=plot(result_emg(:,Z));
+    if Z<10
+        T(end-1)=string(Z);
+    else
+        T(end-2:end-1)=string(Z);
+    end
+    set(line_EMG{Z},'YDataSource',T);  % 设置y轴数据来源 data1
+    hold on      % 为了让多条图线在一个图中显示
 end
+%设置垂直线
+XL = xline(result_emg_idx*9);
 
+%发送指令
+fwrite(b,'T');
 
-drawnow();
 % 清空缓冲区%
 % for i=1:10
 %     fread(b,1000,'uint8');
@@ -86,6 +89,7 @@ while true
                     emg_cnt_state=4;
                 else
                     emg_cnt_state=0;
+                    disp(emg_idx)%%校验错误,打印当前帧位置和数据
                 end
             case 4
                 EMG_Sequence(emg_idx,1) = buff(index);%%%记录包序号
@@ -95,35 +99,26 @@ while true
                 for i=1:9
                     for j=1:8
                        if(EMG_bytes(1,j*3-2+24*(i-1)) > 127)%%%第8位是否为1
-                           EMG_frame(j,i) = swapbytes(typecast(uint8([255 EMG_bytes((j*3-2+24*(i-1)):j*3+24*(i-1))]),'int32'));
+                           EMG_frame(i,j) = swapbytes(typecast(uint8([255 EMG_bytes((j*3-2+24*(i-1)):j*3+24*(i-1))]),'int32'))+8000*j;
                        else
-                           EMG_frame(j,i) = swapbytes(typecast(uint8([0   EMG_bytes((j*3-2+24*(i-1)):j*3+24*(i-1))]),'int32'));                 
+                           EMG_frame(i,j) = swapbytes(typecast(uint8([0   EMG_bytes((j*3-2+24*(i-1)):j*3+24*(i-1))]),'int32'))+8000*j;                 
                        end                         
                     end
                 end
-                EMG(1:8,(emg_idx-1)*9+1:emg_idx*9) = EMG_frame;
                 emg_idx = emg_idx + 1;
                 emg_cnt_state=0;  % switch状态切换%
-
-    
                 % 绘图缓存填充%
-                result_emg(:,(result_emg_idx-1)*9+1:result_emg_idx*9)=EMG_frame*0.02235174;
-%                 if result_emg_idx == 278  %%%278*9=2502
-%                     result_emg=zeros(EMG_CHANNEL,2502);
-%                 end
+                result_emg((result_emg_idx-1)*9+1:result_emg_idx*9,:)=EMG_frame*0.02235174;
                 result_emg_idx=mod(result_emg_idx,278)+1;
                
         end
     end
     %%刷新图像
-    for k=1:8
-        set(line_EMG{k},'YData',result_emg(k,:));
-    end
-    drawnow();   
-
+    refreshdata
+    XL.Value = result_emg_idx*9;   
+    drawnow  
 end
 
 
 AA = diff(EMG_Sequence);
-BB=find(AA~=1);
-CC=diff(BB);
+BB=find((AA~=1)&(AA~=-255));
